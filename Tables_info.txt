@@ -1,0 +1,124 @@
+CREATE TABLE Employee (
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Name VARCHAR(100) NOT NULL,
+Title VARCHAR(50),
+Email VARCHAR(100),
+PhoneNumber VARCHAR(20),
+Status ENUM('Active', 'Resigned') NOT NULL
+);
+
+CREATE TABLE Company (
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Name VARCHAR(100) NOT NULL,
+SectorCategory ENUM('Purification/Hand Protection', 'Agriculture', 'BPO', 'Plantations', 'Investments and Services', 'Eco Solutions', 'Textile Manufacturing', 'Consumer & Retail') NOT NULL,
+OwnerID INT,
+Description TEXT,
+FOREIGN KEY (OwnerID) REFERENCES Employee(ID)
+);
+
+CREATE TABLE Vendor (
+  ID INT PRIMARY KEY AUTO_INCREMENT,
+  VendorName VARCHAR(100) NOT NULL,
+  Description TEXT,
+  ServiceCategory ENUM(
+    'Workflow Automation',
+    'Application Modernization',
+    'IOT Driven Digitalization',
+    'AI and Machine Learning',
+    'Digital Literacy and Learning',
+    'Data Intelligence & Analytics',
+    'Agriculture Process Automation'
+  ) NOT NULL,
+  ContactPersonName VARCHAR(100),
+  ContactPersonPhoneNumber VARCHAR(20),
+  ContactPersonEmail VARCHAR(100)
+);
+
+
+CREATE TABLE Demand (
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Name VARCHAR(100) NOT NULL,
+Description TEXT,
+ReceivedDate DATE NOT NULL,
+Status ENUM('Active', 'Paused', 'Abandoned') NOT NULL,
+GoLiveDate DATE,
+AbandonmentReason TEXT,
+Phase ENUM('Identify', 'Discovery', 'Planning', 'Delivery', 'Live') NOT NULL,
+CompanyID INT NOT NULL,
+DeliveryDomain ENUM('Workflow Automation', 'Application Modernization', 'IOT Driven Digitalization', 'AI and Machine Learning', 'Digital Literacy and Learning', 'Data Intelligence & Analytics', 'Agriculture Process Automation') NOT NULL,
+ServiceCategory ENUM('Implementation', 'Advisory') NOT NULL,
+CompanyPriority ENUM('Low', 'High', 'Medium') NOT NULL,
+CompanyValueDescription TEXT,
+CompanyValueClassification ENUM('Low', 'Medium', 'High') NOT NULL,
+ImplementationComplexity ENUM('Low', 'Medium', 'High') NOT NULL,
+ImplementationCostEstimate ENUM('Low', 'Medium', 'High') NOT NULL,
+ImplementationDuration VARCHAR(50),
+ProjectManagerID INT,
+OwnerID INT,
+VendorID INT,
+DTOwnerID INT,
+FOREIGN KEY (CompanyID) REFERENCES Company(ID),
+FOREIGN KEY (ProjectManagerID) REFERENCES Employee(ID),
+FOREIGN KEY (OwnerID) REFERENCES Employee(ID),
+FOREIGN KEY (VendorID) REFERENCES Vendor(ID),
+FOREIGN KEY (DTOwnerID) REFERENCES Employee(ID)
+);
+
+CREATE TABLE DAB (
+DemandID INT,
+Date DATE,
+Status ENUM('Approved', 'Rejected') NOT NULL,
+Notes TEXT,
+PRIMARY KEY (DemandID, Date),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID)
+);
+
+CREATE TABLE Milestone (
+DemandID INT,
+Date DATE,
+Description TEXT NOT NULL,
+AchievedOrNot ENUM('Achieved', 'Not Achieved') NOT NULL,
+PRIMARY KEY (DemandID, Date),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID)
+);
+
+CREATE TABLE Status (
+DemandID INT,
+Date DATE,
+Description TEXT NOT NULL,
+UpdatedBy INT,
+PRIMARY KEY (DemandID, Date),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID),
+FOREIGN KEY (UpdatedBy) REFERENCES Employee(ID)
+);
+
+CREATE TABLE Proposal (
+DemandID INT,
+DateReceived DATE,
+ProposalURL VARCHAR(255),
+ProposalStatus VARCHAR(50),
+PRIMARY KEY (DemandID, DateReceived),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID)
+);
+
+CREATE TABLE Meeting (
+DemandID INT,
+Date DATE,
+Notes TEXT,
+RecordingURL VARCHAR(255),
+PRIMARY KEY (DemandID, Date),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID)
+);
+
+CREATE TABLE Issues (
+EmployeeID INT,
+DemandID INT,
+TimeRaised DATETIME,
+IssueDescription TEXT NOT NULL,
+Status ENUM('Resolved', 'Pending') NOT NULL,
+ResolutionDescription TEXT,
+ResolutionTime DATETIME,
+PRIMARY KEY (EmployeeID, DemandID, TimeRaised),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(ID),
+FOREIGN KEY (DemandID) REFERENCES Demand(ID)
+);

@@ -1,5 +1,5 @@
 streamlit
 mysql-connector-python
-lmstudio
 python-dotenv
 requests
+pandas
