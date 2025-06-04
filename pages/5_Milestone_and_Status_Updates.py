@@ -8,8 +8,23 @@ import pandas as pd
 st.set_page_config(page_title="Milestone and Status Update", layout="wide")
 st.title("📌 Milestone and Status Update")
 
-from login import login_gate
+from login import login_gate, check_permission, logout
+
+# Enforce login
 login_gate()
+
+# Get current page name
+page_name = os.path.basename(__file__).replace(".py", "")
+
+# Check permissions
+check_permission(page_name)
+
+# Sidebar content
+with st.sidebar:
+    name_display = st.session_state.name if st.session_state.name else "Unknown User"
+    st.write(f"Logged in as: {name_display}")
+    if st.button("Logout"):
+        logout()
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +47,19 @@ def get_demands():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT ID, Name FROM Demand")
+        
+        if st.session_state.is_admin:
+            # Admins see all demands
+            cursor.execute("SELECT ID, Name FROM Demand")
+        else:
+            # Non-admins see only their assigned demands
+            cursor.execute("""
+                SELECT D.ID, D.Name
+                FROM Demand D
+                JOIN Employee E ON D.ProjectManagerID = E.ID
+                WHERE E.Email = %s
+            """, (st.session_state.email,))
+        
         result = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -41,18 +68,18 @@ def get_demands():
         st.error(f"Error fetching demands: {e}")
         return []
 
-def get_employees():
+def get_employee_id(email):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT ID, Name FROM Employee")
-        result = cursor.fetchall()
+        cursor.execute("SELECT ID FROM Employee WHERE Email = %s", (email,))
+        result = cursor.fetchone()
         cursor.close()
         conn.close()
-        return result
+        return result[0] if result else None
     except Exception as e:
-        st.error(f"Error fetching employees: {e}")
-        return []
+        st.error(f"Error fetching employee ID: {e}")
+        return None
 
 # --- Fetch Milestones and Statuses ---
 def get_milestones(demand_id):
@@ -163,17 +190,14 @@ if selected_id:
         status_date = st.date_input("Status Date", value=date.today(), key="status_date")
         status_description = st.text_area("Status Description", key="status_desc")
 
-        employees = get_employees()
-        if not employees:
-            st.warning("No employees available.")
-        else:
-            emp_map = {f"{name} (ID: {eid})": eid for eid, name in employees}
-            selected_emp_label = st.selectbox("Updated By", ["-- Select Employee --"] + list(emp_map.keys()))
-            updated_by_id = emp_map.get(selected_emp_label) if selected_emp_label != "-- Select Employee --" else None
-
-            if st.button("Submit Status Update"):
-                if status_description.strip() == "" or not updated_by_id:
-                    st.warning("Please complete all fields.")
+        if st.button("Submit Status Update"):
+            if status_description.strip() == "":
+                st.warning("Please enter a status description.")
+            else:
+                # Get logged-in user's Employee.ID
+                updated_by_id = get_employee_id(st.session_state.email)
+                if not updated_by_id:
+                    st.error("❌ Could not retrieve your employee ID. Please check your account.")
                 else:
                     try:
                         status_dt = get_next_available_datetime(selected_id, status_date, is_milestone=False)

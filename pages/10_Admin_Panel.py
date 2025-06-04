@@ -8,8 +8,24 @@ import secrets
 st.set_page_config(page_title="Admin Panel", layout="centered")
 st.title("🔐 Admin Panel")
 
-from login import login_gate
+import os
+from login import login_gate, check_permission, logout
+
+# Enforce login
 login_gate()
+
+# Get current page name
+page_name = os.path.basename(__file__).replace(".py", "")
+
+# Check permissions
+check_permission(page_name)
+
+# Sidebar content
+with st.sidebar:
+    name_display = st.session_state.name if st.session_state.name else "Unknown User"
+    st.write(f"Logged in as: {name_display}")
+    if st.button("Logout"):
+        logout()
 
 # Load environment variables
 load_dotenv()
@@ -99,21 +115,9 @@ with tabs[0]:
 
 
 # ---------------- COMPANY REGISTRATION ----------------
+# ---------------- COMPANY REGISTRATION ----------------
 with tabs[1]:
     st.header("Register New Company")
-
-    # Load employee data only when this tab is active
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT ID, Name FROM Employee ORDER BY Name")
-        employee_rows = cursor.fetchall()
-        employee_options = {f"{name} (ID: {emp_id})": emp_id for emp_id, name in employee_rows}
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        st.error("❌ Failed to load employee list")
-        employee_options = {}
 
     # Input fields
     company_name = st.text_input("Company Name")
@@ -121,33 +125,31 @@ with tabs[1]:
         "Purification/Hand Protection", "Agriculture", "BPO", "Plantations",
         "Investments and Services", "Eco Solutions", "Textile Manufacturing", "Consumer & Retail"
     ], index=None)
-    
-    owner_display = st.selectbox("Owner (Employee)", list(employee_options.keys()), index=None) if employee_options else None
-    owner_id = employee_options[owner_display] if owner_display else None
 
+    owner_name = st.text_input("Owner Name")  # manual text input for owner name
     description = st.text_area("Description")
 
     # Registration logic
     if st.button("Register Company"):
-        if not (company_name and sector_category and owner_id):
+        if not (company_name and sector_category and owner_name):
             st.warning("⚠️ Company name, sector, and owner are required.")
         else:
             try:
                 conn = get_connection()
                 cursor = conn.cursor()
 
-                # Check for duplicates (same company name + owner)
+                # Check for duplicates using owner name string
                 cursor.execute("""
                     SELECT COUNT(*) FROM Company
-                    WHERE Name = %s AND OwnerID = %s
-                """, (company_name, owner_id))
+                    WHERE Name = %s AND OwnerName = %s
+                """, (company_name, owner_name))
                 if cursor.fetchone()[0] > 0:
                     st.error("❌ A company with the same name and owner already exists.")
                 else:
                     cursor.execute("""
-                        INSERT INTO Company (Name, SectorCategory, OwnerID, Description)
+                        INSERT INTO Company (Name, SectorCategory, OwnerName, Description)
                         VALUES (%s, %s, %s, %s)
-                    """, (company_name, sector_category, owner_id, description))
+                    """, (company_name, sector_category, owner_name, description))
                     conn.commit()
                     st.success("✅ Company registered successfully.")
             except Exception as e:

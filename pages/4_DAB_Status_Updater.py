@@ -9,8 +9,24 @@ import pandas as pd
 st.set_page_config(page_title="DAB Status Updater", layout="centered")
 st.title("📋 DAB Status Updater")
 
-from login import login_gate
+import os
+from login import login_gate, check_permission, logout
+
+# Enforce login
 login_gate()
+
+# Get current page name
+page_name = os.path.basename(__file__).replace(".py", "")
+
+# Check permissions
+check_permission(page_name)
+
+# Sidebar content
+with st.sidebar:
+    name_display = st.session_state.name if st.session_state.name else "Unknown User"
+    st.write(f"Logged in as: {name_display}")
+    if st.button("Logout"):
+        logout()
 
 # Load environment variables
 load_dotenv()

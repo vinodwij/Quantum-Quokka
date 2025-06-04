@@ -4,11 +4,26 @@ from utils.db import run_sql
 from utils.helpers import extract_sql_from_response
 import pandas as pd
 
-from login import login_gate
-login_gate()
-
+import os
+from login import login_gate, check_permission, logout
 
 st.title("🧠 SQL Chatbot for Demand Management")
+
+# Enforce login
+login_gate()
+
+# Get current page name
+page_name = os.path.basename(__file__).replace(".py", "")
+
+# Check permissions
+check_permission(page_name)
+
+# Sidebar content
+with st.sidebar:
+    name_display = st.session_state.name if st.session_state.name else "Unknown User"
+    st.write(f"Logged in as: {name_display}")
+    if st.button("Logout"):
+        logout()
 
 user_input = st.text_input("Ask a question about the database:", placeholder="E.g. Show me all active demands")
 

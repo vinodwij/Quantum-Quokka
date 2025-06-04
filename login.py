@@ -12,49 +12,85 @@ DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
 
 def get_connection():
-    return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME
-    )
+    try:
+        return mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS,
+            database=DB_NAME
+        )
+    except mysql.connector.Error as e:
+        st.error(f"❌ Database connection failed: {e}")
+        return None
 
-# ---------------- LOGIN PAGE ----------------
 def login_gate():
+    # Initialize session state variables
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
+    if 'is_admin' not in st.session_state:
+        st.session_state.is_admin = False
+    if 'email' not in st.session_state:
+        st.session_state.email = None
+    if 'name' not in st.session_state:
+        st.session_state.name = None
 
+    # If user is authenticated, return to allow page rendering
     if st.session_state.authenticated:
-        return  # User is already authenticated
+        return
 
-    st.markdown("## 🔐 Please log in to continue")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+    # Display login form
+    st.markdown("## 🔐 Login to Access the Application")
+    email = st.text_input("Email", key="login_email_unique")
+    password = st.text_input("Password", type="password", key="login_password_unique")
 
     if st.button("Login"):
         if not email or not password:
-            st.warning("⚠️ Enter both email and password")
+            st.warning("⚠️ Please enter both email and password")
+            return
+
+        conn = get_connection()
+        if not conn:
             return
 
         try:
-            conn = get_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT Password FROM Employee WHERE Email = %s", (email,))
+            # Fetch Name, Password, IsAdmin
+            cursor.execute("SELECT Name, Password, IsAdmin FROM Employee WHERE Email = %s", (email,))
             result = cursor.fetchone()
             cursor.close()
             conn.close()
 
-            if result and bcrypt.checkpw(password.encode('utf-8'), result[0].encode('utf-8')):
-                st.session_state.authenticated = True
-                st.rerun()  # Reload the page to unlock content
+            if result:
+                name, stored_password, is_admin = result
+                if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+                    st.session_state.authenticated = True
+                    st.session_state.is_admin = bool(is_admin)
+                    st.session_state.email = email
+                    st.session_state.name = name if name else email  # Fallback to email if Name is NULL
+                    st.success(f"✅ Login successful for {st.session_state.name}!")
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid password")
             else:
-                st.error("❌ Invalid email or password")
-        except Exception as e:
+                st.error("❌ Email not found")
+        except mysql.connector.Error as e:
             st.error(f"❌ Login failed: {e}")
+            return
 
-# Call this at the top of each page to lock access
-login_gate()
-
-# Show the rest of the page only after login
-if not st.session_state.authenticated:
+    # Stop rendering until authenticated
     st.stop()
+
+def check_permission(page_name):
+    # Pages accessible to non-admin users
+    allowed_pages = ["5_Milestone_and_Status_Updates", "7_Raise_an_Issue"]
+    if not st.session_state.is_admin and page_name not in allowed_pages:
+        st.error("❌ You do not have permission to access this page.")
+        st.stop()
+
+def logout():
+    # Clear session state
+    st.session_state.authenticated = False
+    st.session_state.is_admin = False
+    st.session_state.email = None
+    st.session_state.name = None
+    st.rerun()
