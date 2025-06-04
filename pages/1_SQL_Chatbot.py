@@ -4,6 +4,10 @@ from utils.db import run_sql
 from utils.helpers import extract_sql_from_response
 import pandas as pd
 
+from login import login_gate
+login_gate()
+
+
 st.title("🧠 SQL Chatbot for Demand Management")
 
 user_input = st.text_input("Ask a question about the database:", placeholder="E.g. Show me all active demands")
