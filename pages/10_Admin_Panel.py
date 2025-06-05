@@ -46,6 +46,12 @@ def get_connection():
 tabs = st.tabs(["👤 Employee Registration", "🏢 Company Registration"])
 
 # ---------------- EMPLOYEE REGISTRATION ----------------
+import streamlit as st
+import mysql.connector
+import bcrypt
+from login import get_connection
+from email_utils import send_registration_email
+
 with tabs[0]:
     st.header("Register New Employee")
 
@@ -106,15 +112,15 @@ with tabs[0]:
                         hashed_password, int(is_admin)
                     ))
                     conn.commit()
-                    st.success("✅ Employee registered successfully.")
+                    # Send registration email with email and password
+                    send_registration_email(email, password)
+                    st.success("✅ Employee registered successfully. A confirmation email has been sent.")
             except Exception as e:
                 st.error(f"❌ Error: {e}")
             finally:
                 cursor.close()
                 conn.close()
 
-
-# ---------------- COMPANY REGISTRATION ----------------
 # ---------------- COMPANY REGISTRATION ----------------
 with tabs[1]:
     st.header("Register New Company")
