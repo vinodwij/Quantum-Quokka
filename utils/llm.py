@@ -1,13 +1,9 @@
-import os
 import logging
 import requests
 import sys
 from pathlib import Path
 from typing import List
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+import streamlit as st
 
 
 def configure_logger() -> logging.Logger:
@@ -47,8 +43,9 @@ def call_llm(user_query: str, prompt_path: str = "prompts/sql_assistant.txt") ->
         logger.error("Empty user query")
         raise ValueError("User query cannot be empty")
 
-    api_url = os.getenv("LLM_API_URL")
-    model = os.getenv("LLM_MODEL")
+    # Load LLM API config from secrets.toml
+    api_url = st.secrets["llm"]["api_url"]
+    model = st.secrets["llm"]["model"]
     if not api_url or not model:
         error_msg = "Environment variables LLM_API_URL and LLM_MODEL must be set"
         logger.error(error_msg)
@@ -64,7 +61,10 @@ def call_llm(user_query: str, prompt_path: str = "prompts/sql_assistant.txt") ->
         response = requests.post(
             api_url,
             json={"model": model, "messages": messages},
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {st.secrets['llm']['api_key']}"
+            },
             timeout=30
         )
         response.raise_for_status()
