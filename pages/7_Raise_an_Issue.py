@@ -3,6 +3,9 @@ import mysql.connector
 import os
 from datetime import datetime
 import pandas as pd
+from utils.utils import load_css_once
+
+load_css_once()
 
 # Main UI
 st.set_page_config(page_title="Raise and Manage Issues", layout="wide")

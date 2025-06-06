@@ -2,6 +2,9 @@
 import streamlit as st
 import mysql.connector
 import os
+from utils.utils import load_css_once
+
+load_css_once()
 
 st.set_page_config(page_title="Vendor Management", layout="centered")
 st.title("📋 Vendor Management")

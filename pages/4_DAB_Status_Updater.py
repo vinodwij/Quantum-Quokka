@@ -3,6 +3,9 @@ import mysql.connector
 import os
 from datetime import date
 import pandas as pd
+from utils.utils import load_css_once
+
+load_css_once()
 
 # --- UI Setup ---
 st.set_page_config(page_title="DAB Status Updater", layout="centered")

@@ -3,6 +3,9 @@ import mysql.connector
 import os
 from datetime import date, datetime, time, timedelta
 import pandas as pd
+from utils.utils import load_css_once
+
+load_css_once()
 
 st.set_page_config(page_title="Milestone and Status Update", layout="wide")
 st.title("📌 Milestone and Status Update")

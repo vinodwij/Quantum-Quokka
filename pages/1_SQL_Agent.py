@@ -5,6 +5,11 @@ from utils.helpers import extract_sql_from_response
 import pandas as pd
 import os
 from login import login_gate, check_permission, logout
+from utils.utils import load_css_once
+
+load_css_once()
+
+
 
 # Set page title
 st.title("🧠 SQL Agent for Demand Management")

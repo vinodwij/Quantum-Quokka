@@ -3,6 +3,9 @@ import mysql.connector
 import os
 import bcrypt
 import secrets
+from utils.utils import load_css_once
+
+load_css_once()
 
 st.set_page_config(page_title="Admin Panel", layout="centered")
 st.title("🔐 Admin Panel")
