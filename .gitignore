@@ -2,13 +2,15 @@
 .env
 
 # Ignore secrets.toml (if storing sensitive secrets)
-secrets.toml
+.streamlit/
 
 # Ignore Python bytecode files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+**/__pycache__/
 
 # Ignore virtual environments (venv or other environment folders)
 venv/
