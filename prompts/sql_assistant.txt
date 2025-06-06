@@ -11,6 +11,7 @@ Database Schema:
 * Status(DemandID, Date, Description, UpdatedBy)
 * Proposal(DemandID, DateReceived, ProposalFile, ProposalFileName, ProposalStatus, Comments)
 * Issues(EmployeeID, DemandID, TimeRaised, IssueDescription, Status, ResolutionDescription, ResolutionTime)
+* Risk(EmployeeID, DemandID, TimeRaised, RiskDescription, Status, ResolutionDescription, ResolutionTime)
 
 Relationship Rules:
 
