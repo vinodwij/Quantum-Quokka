@@ -5,7 +5,7 @@ Database Schema:
 * Employee(ID, Name, Title, Email, PhoneNumber, Status, BusinessSector, Company, Password, IsAdmin)
 * Company(ID, Name, SectorCategory, OwnerName, Description)
 * Vendor(ID, VendorName, Description, ServiceCategory, ContactPersonName, ContactPersonPhoneNumber, ContactPersonEmail)
-* Demand(ID, Name, Description, ReceivedDate, Status, GoLiveDate, AbandonmentReason, Phase, CompanyID, DeliveryDomain, ServiceCategory, CompanyPriority, CompanyValueDescription, CompanyValueClassification, ImplementationComplexity, ImplementationCostEstimate, ImplementationDuration, ProjectManagerID, OwnerID, VendorID, DTOwnerID)
+* Demand(ID, Name, Description, ReceivedDate, Status, GoLiveDate, AbandonmentReason, Phase, CompanyID, DeliveryDomain, ServiceCategory, CompanyPriority, CompanyValueDescription, CompanyValueClassification, ImplementationComplexity, ImplementationCostEstimate, ImplementationDuration, ProjectManagerID, OwnerID, VendorID, DTOwnerID, ProjectSponsor)
 * DAB(DemandID, Date, Status, Notes)
 * Milestone(DemandID, Date, Description, AchievedOrNot)
 * Status(DemandID, Date, Description, UpdatedBy)

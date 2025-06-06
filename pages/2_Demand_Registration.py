@@ -1,4 +1,3 @@
-
 import streamlit as st
 import mysql.connector
 import os
@@ -10,7 +9,6 @@ st.title("📋 Demand Management")
 
 load_css_once()
 
-import os
 from login import login_gate, check_permission, logout
 
 # Enforce login
@@ -35,28 +33,34 @@ DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
 
-
 def get_connection():
-    return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME
-    )
+    try:
+        return mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS,
+            database=DB_NAME
+        )
+    except mysql.connector.Error as e:
+        st.error(f"❌ Database connection failed: {str(e)}")
+        return None
 
 def get_dropdown_data(query):
+    conn = get_connection()
+    if not conn:
+        return []
     try:
-        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(query)
         result = cursor.fetchall()
         return result
-    except Exception as e:
-        st.error(f"Dropdown load error: {e}")
+    except mysql.connector.Error as e:
+        st.error(f"❌ Dropdown load error: {str(e)}")
         return []
     finally:
-        cursor.close()
-        conn.close()
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
 
 def get_id(selection):
     try:
@@ -80,6 +84,7 @@ with tab1:
         "Data Intelligence & Analytics", "Agriculture Process Automation"
     ], key="reg_delivery_domain")
     service_category = st.selectbox("Service Category", ["Implementation", "Advisory"], key="reg_service_category")
+    project_sponsor = st.text_input("Project Sponsor", key="reg_project_sponsor")
 
     company_list = get_dropdown_data("SELECT ID, Name FROM Company")
     employee_list = get_dropdown_data("SELECT ID, Name FROM Employee")
@@ -87,8 +92,8 @@ with tab1:
 
     company = st.selectbox("Company", [f"{n} (ID: {i})" for i, n in company_list], key="reg_company")
     project_manager = st.selectbox("Project Manager", ["Select a person"] + employee_options, index=0, key="reg_pm")
-    owner = st.selectbox("Owner", ["Select a person"] + employee_options, index=0, key="reg_owner")
-    dto = st.selectbox("DTO Owner", ["Select a person"] + employee_options, index=0, key="reg_dto")
+    owner = st.selectbox("Product Owner", ["Select a person"] + employee_options, index=0, key="reg_owner")
+    dto = st.selectbox("Digital Transformation Owner", ["Select a person"] + employee_options, index=0, key="reg_dto")
 
     company_id = get_id(company)
     pm_id = get_id(project_manager)
@@ -97,9 +102,9 @@ with tab1:
 
     if st.button("Register Demand", key="reg_submit"):
         if "Select a person" in [project_manager, owner, dto] or len({pm_id, owner_id, dto_id}) < 3:
-            st.error("❌ Project Manager, Owner, and DTOwner must be selected and different.")
+            st.error("❌ Project Manager, Product Owner, and Digital Transformation Owner must be selected and different.")
         elif not (name and description and received_date and status and phase and delivery_domain and service_category and company_id):
-            st.error("❌ Please fill all required fields.")
+            st.error("❌ Please fill all required fields except Project Sponsor, which is optional.")
         else:
             try:
                 conn = get_connection()
@@ -107,19 +112,20 @@ with tab1:
                 cursor.execute("""
                     INSERT INTO Demand (
                         Name, Description, ReceivedDate, Status, Phase, DeliveryDomain, ServiceCategory,
-                        CompanyID, ProjectManagerID, OwnerID, DTOwnerID
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        CompanyID, ProjectManagerID, ProductOwnerID, DTOwnerID, ProjectSponsor
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     name, description, received_date, status, phase, delivery_domain, service_category,
-                    company_id, pm_id, owner_id, dto_id
+                    company_id, pm_id, owner_id, dto_id, project_sponsor or None
                 ))
                 conn.commit()
                 st.success(f"✅ Demand '{name}' registered successfully.")
-            except Exception as e:
-                st.error(f"❌ Error: {e}")
+            except mysql.connector.Error as e:
+                st.error(f"❌ Error: {str(e)}")
             finally:
-                cursor.close()
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
 
 with tab2:
     st.header("Update Demand Details")
@@ -137,8 +143,8 @@ with tab2:
             demand = cursor.fetchone()
             cursor.close()
             conn.close()
-        except Exception as e:
-            st.error(f"❌ Error fetching demand: {e}")
+        except mysql.connector.Error as e:
+            st.error(f"❌ Error fetching demand: {str(e)}")
             demand = None
 
         if demand:
@@ -174,11 +180,12 @@ with tab2:
                     ))
                     conn.commit()
                     st.success(f"✅ Demand '{selected_demand}' updated successfully.")
-                except Exception as e:
-                    st.error(f"❌ Error: {e}")
+                except mysql.connector.Error as e:
+                    st.error(f"❌ Error: {str(e)}")
                 finally:
-                    cursor.close()
-                    conn.close()
+                    if conn.is_connected():
+                        cursor.close()
+                        conn.close()
 
 with tab3:
     st.header("Admin Update - Initial Fields")
@@ -193,8 +200,8 @@ with tab3:
             demand = cursor.fetchone()
             cursor.close()
             conn.close()
-        except Exception as e:
-            st.error(f"❌ Error fetching demand: {e}")
+        except mysql.connector.Error as e:
+            st.error(f"❌ Error fetching demand: {str(e)}")
             demand = None
 
         if demand:
@@ -211,11 +218,12 @@ with tab3:
                       "AI and Machine Learning", "Digital Literacy and Learning",
                       "Data Intelligence & Analytics", "Agriculture Process Automation"].index(demand['DeliveryDomain']), key="admin_delivery_domain")
             service_category = st.selectbox("Service Category", ["Implementation", "Advisory"], index=["Implementation", "Advisory"].index(demand['ServiceCategory']), key="admin_service_category")
+            project_sponsor = st.text_input("Project Sponsor", value=demand['ProjectSponsor'] or "", key="admin_project_sponsor")
 
             company = st.selectbox("Company", [f"{n} (ID: {i})" for i, n in company_list], index=next((i for i, c in enumerate(company_list) if c[0] == demand['CompanyID']), 0), key="admin_company")
             project_manager = st.selectbox("Project Manager", ["Select a person"] + employee_options, index=next((i+1 for i, e in enumerate(employee_list) if e[0] == demand['ProjectManagerID']), 0), key="admin_pm")
-            owner = st.selectbox("Owner", ["Select a person"] + employee_options, index=next((i+1 for i, e in enumerate(employee_list) if e[0] == demand['OwnerID']), 0), key="admin_owner")
-            dto = st.selectbox("DTO Owner", ["Select a person"] + employee_options, index=next((i+1 for i, e in enumerate(employee_list) if e[0] == demand['DTOwnerID']), 0), key="admin_dto")
+            owner = st.selectbox("Product Owner", ["Select a person"] + employee_options, index=next((i+1 for i, e in enumerate(employee_list) if e[0] == demand['ProductOwnerID']), 0), key="admin_owner")
+            dto = st.selectbox("Digital Transformation Owner", ["Select a person"] + employee_options, index=next((i+1 for i, e in enumerate(employee_list) if e[0] == demand['DTOwnerID']), 0), key="admin_dto")
 
             company_id = get_id(company)
             pm_id = get_id(project_manager)
@@ -224,7 +232,7 @@ with tab3:
 
             if st.button("Admin Update Demand", key="admin_submit"):
                 if "Select a person" in [project_manager, owner, dto] or len({pm_id, owner_id, dto_id}) < 3:
-                    st.error("❌ Project Manager, Owner, and DTOwner must be selected and different.")
+                    st.error("❌ Project Manager, Product Owner, and Digital Transformation Owner must be selected and different.")
                 else:
                     try:
                         conn = get_connection()
@@ -233,16 +241,19 @@ with tab3:
                             UPDATE Demand SET
                                 Name = %s, Description = %s, ReceivedDate = %s, Status = %s,
                                 Phase = %s, DeliveryDomain = %s, ServiceCategory = %s,
-                                CompanyID = %s, ProjectManagerID = %s, OwnerID = %s, DTOwnerID = %s
+                                CompanyID = %s, ProjectManagerID = %s, ProductOwnerID = %s, DTOwnerID = %s,
+                                ProjectSponsor = %s
                             WHERE ID = %s
                         """, (
                             name, description, received_date, status, phase,
-                            delivery_domain, service_category, company_id, pm_id, owner_id, dto_id, demand_id
+                            delivery_domain, service_category, company_id, pm_id, owner_id, dto_id,
+                            project_sponsor or None, demand_id
                         ))
                         conn.commit()
                         st.success(f"✅ Demand '{selected_admin_demand}' updated successfully.")
-                    except Exception as e:
-                        st.error(f"❌ Error: {e}")
+                    except mysql.connector.Error as e:
+                        st.error(f"❌ Error: {str(e)}")
                     finally:
-                        cursor.close()
-                        conn.close()
+                        if conn.is_connected():
+                            cursor.close()
+                            conn.close()

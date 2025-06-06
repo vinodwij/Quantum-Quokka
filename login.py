@@ -81,7 +81,7 @@ def login_gate():
 
 def check_permission(page_name):
     # Pages accessible to non-admin users
-    allowed_pages = ["5_Milestone_and_Status_Updates", "7_Raise_an_Issue"]
+    allowed_pages = ["5_Milestone_and_Status_Updates", "7_Risks_and_Issues"]
     if not st.session_state.is_admin and page_name not in allowed_pages:
         st.error("❌ You do not have permission to access this page.")
         st.stop()
