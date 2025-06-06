@@ -129,7 +129,7 @@ with tabs[1]:
     # Input fields
     company_name = st.text_input("Company Name")
     sector_category = st.selectbox("Sector Category", [
-        "Purification/Hand Protection", "Agriculture", "BPO", "Plantations",
+        "Purification", "Hand Protection", "Agriculture", "BPO", "Plantations",
         "Investments and Services", "Eco Solutions", "Textile Manufacturing", "Consumer & Retail"
     ], index=None)
 
