@@ -5,11 +5,12 @@ from datetime import date
 import pandas as pd
 from utils.utils import load_css_once
 
-load_css_once()
 
 # --- UI Setup ---
 st.set_page_config(page_title="DAB Status Updater", layout="centered")
 st.title("📋 DAB Status Updater")
+
+load_css_once()
 
 import os
 from login import login_gate, check_permission, logout

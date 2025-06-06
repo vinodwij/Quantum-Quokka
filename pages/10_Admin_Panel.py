@@ -5,10 +5,10 @@ import bcrypt
 import secrets
 from utils.utils import load_css_once
 
-load_css_once()
-
 st.set_page_config(page_title="Admin Panel", layout="centered")
 st.title("🔐 Admin Panel")
+
+load_css_once()
 
 import os
 from login import login_gate, check_permission, logout

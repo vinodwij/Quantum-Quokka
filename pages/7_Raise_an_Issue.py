@@ -5,11 +5,12 @@ from datetime import datetime
 import pandas as pd
 from utils.utils import load_css_once
 
-load_css_once()
 
 # Main UI
 st.set_page_config(page_title="Raise and Manage Issues", layout="wide")
 st.title("🛠️ Issue Management")
+
+load_css_once()
 
 from login import login_gate, check_permission, logout
 

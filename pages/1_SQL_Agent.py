@@ -7,12 +7,13 @@ import os
 from login import login_gate, check_permission, logout
 from utils.utils import load_css_once
 
-load_css_once()
 
 
 
 # Set page title
 st.title("🧠 SQL Agent for Demand Management")
+
+load_css_once()
 
 # Enforce login
 login_gate()
