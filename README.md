@@ -1,1 +1,0 @@
-### This project aims to create an end to end demand management system integrated with a chat agent capable of retreiving data from SQL into NLP for a user to basically be able to talk to their database
