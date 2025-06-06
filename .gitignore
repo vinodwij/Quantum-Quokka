@@ -1,9 +1,6 @@
 # Ignore .env file (for sensitive data like API keys)
 .env
 
-# Ignore secrets.toml (if storing sensitive secrets)
-.streamlit/
-
 # Ignore Python bytecode files
 __pycache__/
 *.pyc

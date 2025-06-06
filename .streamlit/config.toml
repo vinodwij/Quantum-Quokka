@@ -1,0 +1,15 @@
+[server]
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false
+
+[global]
+showWarningOnDirectExecution = false
+
+[menu]
+showGitHub = false
+showDeployButton = false
