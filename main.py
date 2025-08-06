@@ -30,7 +30,7 @@ DB_HOST = st.secrets["db"]["host"]
 DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
-DB_PORT = st.secrets["db"]["port"]  # ✅ Added this line
+DB_PORT = st.secrets["db"]["port"] 
 
 def get_connection():
     return mysql.connector.connect(
