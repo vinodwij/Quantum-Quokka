@@ -50,10 +50,11 @@ tab1, tab2 = st.tabs(["Vendor Registration", "Vendor Details Update - Admin"])
 # Helper function to get DB connection
 def get_connection():
     return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME
+        host=st.secrets["db"]["host"],
+        user=st.secrets["db"]["user"],
+        password=st.secrets["db"]["pass"],
+        database=st.secrets["db"]["name"],
+        port=st.secrets["db"]["port"] 
     )
 
 # Helper function to check if vendor exists

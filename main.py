@@ -30,14 +30,15 @@ DB_HOST = st.secrets["db"]["host"]
 DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
-
+DB_PORT = st.secrets["db"]["port"]  # ✅ Added this line
 
 def get_connection():
     return mysql.connector.connect(
         host=DB_HOST,
         user=DB_USER,
         password=DB_PASS,
-        database=DB_NAME
+        database=DB_NAME,
+        port=DB_PORT  # ✅ Include port here
     )
 
 def fetch_all_demands():

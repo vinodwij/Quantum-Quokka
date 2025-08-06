@@ -29,20 +29,15 @@ with st.sidebar:
     if st.button("Logout"):
         logout()
 
-# Load DB credentials from secrets.toml
-DB_HOST = st.secrets["db"]["host"]
-DB_NAME = st.secrets["db"]["name"]
-DB_USER = st.secrets["db"]["user"]
-DB_PASS = st.secrets["db"]["pass"]
-
-
 def get_connection():
     return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME
+        host=st.secrets["db"]["host"],
+        user=st.secrets["db"]["user"],
+        password=st.secrets["db"]["pass"],
+        database=st.secrets["db"]["name"],
+        port=st.secrets["db"]["port"] 
     )
+
 
 tabs = st.tabs(["👤 Employee Registration", "🏢 Company Registration"])
 

@@ -13,7 +13,8 @@ def run_sql(query):
             host=st.secrets["db"]["host"],
             user=st.secrets["db"]["user"],
             password=st.secrets["db"]["pass"],
-            database=st.secrets["db"]["name"]
+            database=st.secrets["db"]["name"],
+            port=st.secrets["db"]["port"]  # ✅ Include port here
         )
         cursor = conn.cursor()
         cursor.execute(query)
