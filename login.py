@@ -74,13 +74,7 @@ def login_gate():
                     st.success(f"✅ Login successful for {st.session_state.name}!")
                     st.rerun()
                 else:
-                    #st.error("❌ Invalid password")
-                    st.session_state.authenticated = True
-                    st.session_state.is_admin = bool(is_admin)
-                    st.session_state.email = email
-                    st.session_state.name = name if name else email  # Fallback to email if Name is NULL
-                    st.success(f"✅ Login successful for {st.session_state.name}!")
-                    st.rerun()
+                    st.error("❌ Invalid password")
             else:
                 st.error("❌ Email not found")
         except mysql.connector.Error as e:
