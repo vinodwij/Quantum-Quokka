@@ -40,3 +40,6 @@ def run_sql(query):
             if conn: conn.close()
         except:
             pass
+
+
+

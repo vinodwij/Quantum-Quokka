@@ -33,6 +33,20 @@ DB_HOST = st.secrets["db"]["host"]
 DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
+DB_PORT = st.secrets["db"]["port"]  # ✅ Added port
+
+def get_connection():
+    try:
+        return mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS,
+            database=DB_NAME,
+            port=DB_PORT  # ✅ Ensure correct port is used
+        )
+    except mysql.connector.Error as e:
+        st.error(f"❌ Database connection failed: {e}")
+        return None
 
 
 service_categories = [
@@ -46,16 +60,6 @@ service_categories = [
 ]
 
 tab1, tab2 = st.tabs(["Vendor Registration", "Vendor Details Update - Admin"])
-
-# Helper function to get DB connection
-def get_connection():
-    return mysql.connector.connect(
-        host=st.secrets["db"]["host"],
-        user=st.secrets["db"]["user"],
-        password=st.secrets["db"]["pass"],
-        database=st.secrets["db"]["name"],
-        port=st.secrets["db"]["port"] 
-    )
 
 # Helper function to check if vendor exists
 def vendor_exists(vendor_name):

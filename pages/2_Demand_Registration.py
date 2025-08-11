@@ -32,6 +32,7 @@ DB_HOST = st.secrets["db"]["host"]
 DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
+DB_PORT = st.secrets["db"]["port"]  # ✅ Added port
 
 def get_connection():
     try:
@@ -40,10 +41,10 @@ def get_connection():
             user=DB_USER,
             password=DB_PASS,
             database=DB_NAME,
-            port=st.secrets["db"]["port"]  # ✅ Add this line
+            port=DB_PORT  # ✅ Ensure correct port is used
         )
     except mysql.connector.Error as e:
-        st.error(f"❌ Database connection failed: {str(e)}")
+        st.error(f"❌ Database connection failed: {e}")
         return None
 
 def get_dropdown_data(query):
