@@ -8,30 +8,6 @@ import streamlit as st
 EMAIL_ADDRESS = st.secrets["email"]["address"]
 EMAIL_PASSWORD = st.secrets["email"]["password"]
 
-# Original email-sending function
-def send_project_email():
-    # Email details
-    to_emails = ["deneize.perera@digitalt.hayleys.com"]
-    subject = "Digital Transformation Project Agent"
-    body = "Dear Sir, Hi"
-
-    # Build the email
-    message = MIMEMultipart()
-    message["From"] = EMAIL_ADDRESS
-    message["To"] = ", ".join(to_emails)
-    message["Subject"] = subject
-    message.attach(MIMEText(body, "plain"))
-
-    # Send email
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            server.sendmail(EMAIL_ADDRESS, to_emails, message.as_string())
-        print("✅ Email sent successfully!")
-    except Exception as e:
-        print(f"❌ Error: {e}")
-
 # New function for sending registration email
 def send_registration_email(user_email, password):
     # Email details
