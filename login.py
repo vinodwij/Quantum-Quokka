@@ -8,15 +8,20 @@ DB_HOST = st.secrets["db"]["host"]
 DB_NAME = st.secrets["db"]["name"]
 DB_USER = st.secrets["db"]["user"]
 DB_PASS = st.secrets["db"]["pass"]
-
+DB_PORT = int(st.secrets["db"]["port"])  # Ensure it's an integer
 
 def get_connection():
     try:
+        # If using Railway's public URL (gondola.proxy...), enable SSL
+        ssl_required = "proxy.rlwy.net" in DB_HOST
+
         return mysql.connector.connect(
             host=DB_HOST,
+            port=DB_PORT,
             user=DB_USER,
             password=DB_PASS,
-            database=DB_NAME
+            database=DB_NAME,
+            ssl_disabled=not ssl_required
         )
     except mysql.connector.Error as e:
         st.error(f"❌ Database connection failed: {e}")
